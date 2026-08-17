@@ -262,6 +262,13 @@ main{max-width:1120px;margin:0 auto;padding:24px 22px 90px}
 .nhk-link:hover{box-shadow:0 3px 12px rgba(0,0,0,.07);transform:translateY(-1px)}
 .nhk-badge{font-size:10px;font-weight:700;color:#fff;background:#3B5CA8;border-radius:5px;padding:2px 6px}
 .nhk-t{font-size:14px;color:var(--ink);font-weight:700}
+.sekki-links h5{margin:16px 0 8px;font-size:12.5px;color:var(--muted);font-weight:700}
+.nhk-link.cat-cook{border-left-color:#C0692C;background:linear-gradient(180deg,rgba(192,105,44,.07),var(--card))}
+.nhk-link.cat-mb{border-left-color:#2E8B57;background:linear-gradient(180deg,rgba(46,139,87,.07),var(--card))}
+.nhk-link.cat-wy{border-left-color:#7A5AA8;background:linear-gradient(180deg,rgba(122,90,168,.07),var(--card))}
+.nhk-badge.cat-cook{background:#C0692C}
+.nhk-badge.cat-mb{background:#2E8B57}
+.nhk-badge.cat-wy{background:#7A5AA8}
 @media(max-width:560px){.authgrid{gap:7px}.authcard{min-width:calc(50% - 4px);flex:1 1 calc(50% - 4px)}.authcard.big{min-width:calc(50% - 4px)}.omikuji{margin:10px 0 0;width:100%}}
 /* search */
 .sr-head{display:flex;align-items:baseline;gap:12px;margin-bottom:16px}
@@ -910,11 +917,37 @@ function sekkiInMonth(y,m){ let out=[]; SEKKI_YEARS[y].forEach((md,i)=>{ if(md[0
 function kouInMonth(y,m){ const A=almanac(y); let out=[]; A.kouRanges.forEach((k,i)=>{ if(k.s.getMonth()+1===m && k.s.getFullYear()===y) out.push(i); }); return out; }
 function sekkiChip(y,i,nowIdx){ const s=SEKKI_META[i], md=SEKKI_YEARS[y][i]; const now=(i===nowIdx)?' now':'';
   const ac=accentOf(seasonOfSekki(i),i);
-  return `<button class="chip-sekki${now}" style="--accent:${ac}" onclick="openSekki(${y},${i})">${ruby(s[0],s[1])}<span style="font-size:10px;opacity:.8;margin-left:3px">${md[0]}/${md[1]}頃</span>${hasSekkiText(i)?'<span class="koudot" title="NHK講座">講</span>':''}</button>`; }
+  return `<button class="chip-sekki${now}" style="--accent:${ac}" onclick="openSekki(${y},${i})">${ruby(s[0],s[1])}<span style="font-size:10px;opacity:.8;margin-left:3px">${md[0]}/${md[1]}頃</span>${hasSekkiText(i)?'<span class="koudot" title="この節気の読みもの">読</span>':''}</button>`; }
 function seasonOfSekki(i){ return ["冬","冬","春","春","春","春","春","春","夏","夏","夏","夏","夏","夏","秋","秋","秋","秋","秋","秋","冬","冬","冬","冬"][i]||"春"; }
 function hasKouText(i){ return !!KOUTEXT[((i-6+72)%72)+1]; }
 const NHKSEKKI={"立春":"nhk_risshun","大雪":"nhk_taisetsu_nhk","霜降":"nhk_soko","秋分":"nhk_shubun","処暑":"nhk_shosho","大暑":"nhk_taisho","春分":"nhk_shunbun","雨水":"nhk_usui","穀雨":"nhk_kokuu","小満":"nhk_shoman","夏至":"nhk_geshi","冬至":"nhk_toji"};
-function hasSekkiText(i){ return !!(SEKKI_META[i]&&NHKSEKKI[SEKKI_META[i][0]]); }
+/* 二十四節気ごとの関連記事（資料タブの本文へリンク） */
+const SEKKILINKS={
+ "大寒":["ck_02"],
+ "立春":["nhk_risshun","ck_02","mb_risshun"],
+ "雨水":["nhk_usui","ck_02","mb_risshun"],
+ "春分":["nhk_shunbun"],
+ "清明":["mb_tane"],
+ "穀雨":["nhk_kokuu","mb_tane"],
+ "立夏":["wy_rikka"],
+ "小満":["nhk_shoman","ck_summer"],
+ "芒種":["ck_summer","mb_geshi"],
+ "夏至":["nhk_geshi","ck_summer","mb_geshi"],
+ "小暑":["ck_summer"],
+ "大暑":["nhk_taisho","ck_summer"],
+ "立秋":["ck_summer","mb_shosho"],
+ "処暑":["nhk_shosho","ck_09","mb_shosho"],
+ "白露":["ck_09"],
+ "秋分":["nhk_shubun","ck_09"],
+ "寒露":["ck_aki","mb_kanro"],
+ "霜降":["nhk_soko","ck_12","mb_kanro"],
+ "立冬":["ck_12"],
+ "小雪":["ck_12","wy_niiname"],
+ "大雪":["nhk_taisetsu_nhk","ck_01","mb_taisetsu"],
+ "冬至":["nhk_toji","ck_01","mb_taisetsu"]
+};
+function resCat(id){ if(id.indexOf('nhk_')===0)return['NHK講座','cat-nhk']; if(id.indexOf('ck_')===0)return['クックパッド','cat-cook']; if(id.indexOf('mb_')===0)return['月刊マクロビ','cat-mb']; if(id.indexOf('wy_')===0)return['和暦と陰陽','cat-wy']; return['資料','cat-nhk']; }
+function hasSekkiText(i){ return !!(SEKKI_META[i]&&SEKKILINKS[SEKKI_META[i][0]]&&SEKKILINKS[SEKKI_META[i][0]].length); }
 function kouChip(y,i,nowIdx){ const k=KOU72[i]; const now=(i===nowIdx)?' now':'';
   return `<button class="chip-kou${now}${hasKouText(i)?' hastxt':''}" onclick="openKou(${y},${i})">${ruby(k[0],k[1])}${hasKouText(i)?'<span class="koudot" title="七十二候のはなし">文</span>':''}</button>`; }
 
@@ -1194,7 +1227,7 @@ function openSekki(y,i){
      <div class="ref-date">${y}年 ${md[0]}月${md[1]}日ごろ</div>
      <button class="mcopy" onclick="copyStr(${jattr(copytxt)})">⧉ コピー</button></div>
    <div class="mb"><div class="ref-mean sel">${esc(s[2])}</div>
-     ${NHKSEKKI[s[0]]?`<div class="nhk-link" onclick="openResource('${NHKSEKKI[s[0]]}')"><span class="nhk-badge">NHK講座</span><span class="nhk-t mincho">「暮らしの歳時記」${esc(s[0])}の回</span><span class="rgo">本文を読む →</span></div>`:''}
+     ${(SEKKILINKS[s[0]]||[]).filter(id=>ARTICLES[id]).length?`<div class="sekki-links"><h5>この節気の読みもの</h5>${(SEKKILINKS[s[0]]||[]).filter(id=>ARTICLES[id]).map(id=>{const a=ARTICLES[id],c=resCat(id);return `<div class="nhk-link ${c[1]}" onclick="openResource('${id}')"><span class="nhk-badge ${c[1]}">${c[0]}</span><span class="nhk-t mincho">${esc(a.t)}</span><span class="rgo">読む →</span></div>`;}).join('')}</div>`:''}
      <div class="ref-kou"><h5>この節気の七十二候</h5>${rows}</div>
      <div class="vd-note" style="margin-top:14px">${src}</div>
    </div>`;
